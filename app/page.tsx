@@ -1,65 +1,158 @@
-import Image from "next/image";
+/**
+ * Healthcare Data System - Main Page
+ * 
+ * This is the main interface for the healthcare data pipeline.
+ * It orchestrates: Fetch → Process → Analyze → Submit
+ */
+
+'use client';
+
+import { useState } from 'react';
+import { HealthcareRecord, AnalysisResult } from '@/lib/types';
+import { ActionPanel } from '@/components/ActionPanel';
+import { DataTable } from '@/components/DataTable';
+import { StatsDisplay } from '@/components/StatsDisplay';
 
 export default function Home() {
+  const [rawData, setRawData] = useState<HealthcareRecord[]>([]);
+  const [processedData, setProcessedData] = useState<HealthcareRecord[]>([]);
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState('');
+
+  /**
+   * Step 1: Fetch data from external API
+   */
+  const handleFetch = async () => {
+    setIsLoading(true);
+    setStatus('Fetching data from API...');
+    
+    try {
+      const response = await fetch('/api/fetch?endpoint=/data');
+      const result = await response.json();
+      
+      if (result.success) {
+        setRawData(result.data);
+        setStatus(`✅ Successfully fetched ${result.data.length} records`);
+      } else {
+        setStatus(`❌ Error: ${result.error}`);
+      }
+    } catch (error: any) {
+      setStatus(`❌ Failed to fetch: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Step 2: Process and analyze data
+   */
+  const handleProcess = async () => {
+    if (rawData.length === 0) {
+      setStatus('⚠️ Please fetch data first');
+      return;
+    }
+
+    setIsLoading(true);
+    setStatus('Processing and analyzing data...');
+    
+    try {
+      const response = await fetch('/api/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: rawData }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setProcessedData(result.processedData);
+        setAnalysis(result.analysis);
+        setStatus(`✅ Processed ${result.processedData.length} records`);
+      } else {
+        setStatus(`❌ Error: ${result.error}`);
+      }
+    } catch (error: any) {
+      setStatus(`❌ Failed to process: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Step 3: Submit results to external endpoint
+   */
+  const handleSubmit = async () => {
+    if (!analysis) {
+      setStatus('⚠️ Please process data first');
+      return;
+    }
+
+    setIsLoading(true);
+    setStatus('Submitting results...');
+    
+    try {
+      const payload = {
+        analysis,
+        recordCount: processedData.length,
+        status: 'completed' as const,
+        processedAt: new Date().toISOString(),
+      };
+
+      const response = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setStatus('✅ Results submitted successfully!');
+      } else {
+        setStatus(`❌ Error: ${result.error}`);
+      }
+    } catch (error: any) {
+      setStatus(`❌ Failed to submit: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8 rounded-lg shadow-lg">
+          <h1 className="text-4xl font-bold mb-2">Healthcare Data System</h1>
+          <p className="text-blue-100">
+            Complete pipeline: Fetch → Process → Analyze → Submit
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Action Panel */}
+        <ActionPanel
+          onFetch={handleFetch}
+          onProcess={handleProcess}
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+          status={status}
+        />
+
+        {/* Analysis Results */}
+        <StatsDisplay analysis={analysis} />
+
+        {/* Data Table */}
+        {processedData.length > 0 && (
+          <DataTable data={processedData} maxRows={10} />
+        )}
+
+        {/* Footer Info */}
+        <div className="text-center text-sm text-gray-500 mt-8">
+          <p>Built with Next.js, TypeScript, and React</p>
+          <p className="mt-1">Complete healthcare data integration system</p>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

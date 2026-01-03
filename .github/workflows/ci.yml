@@ -34,9 +34,9 @@ jobs:
     - name: Build project
       run: npm run build
       env:
-        NEXT_PUBLIC_API_BASE_URL: ${{ secrets.API_BASE_URL }}
-        API_KEY: ${{ secrets.API_KEY }}
-        POST_ENDPOINT: ${{ secrets.POST_ENDPOINT }}
+        NEXT_PUBLIC_API_BASE_URL: https://api.example.com
+        API_KEY: test_key_for_ci
+        POST_ENDPOINT: https://api.example.com/results
     
     - name: Run tests (if available)
       run: npm test --if-present

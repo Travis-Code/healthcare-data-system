@@ -6,10 +6,9 @@
  * This keeps API keys secure by handling requests server-side
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { dataFetcher } from '@/lib/dataFetcher';
+import { NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Mock data for testing (remove when using real API)
     const mockData = [
@@ -66,12 +65,13 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
     
-  } catch (error: any) {
+  } catch (error) {
     console.error('Fetch API error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch data';
     
     return NextResponse.json({
       success: false,
-      error: error.message || 'Failed to fetch data',
+      error: errorMessage,
     }, { status: 500 });
   }
 }

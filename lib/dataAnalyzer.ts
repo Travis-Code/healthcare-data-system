@@ -10,17 +10,19 @@
 
 import { HealthcareRecord, AnalysisResult } from './types';
 
+interface Statistics {
+  total: number;
+  byType: Record<string, number>;
+  averageValue: number | null;
+}
+
 class DataAnalyzer {
   /**
    * Calculate basic statistics for the dataset
    * @param data - Processed healthcare records
    * @returns Statistical summary
    */
-  calculateStatistics(data: HealthcareRecord[]): {
-    total: number;
-    byType: Record<string, number>;
-    averageValue: number | null;
-  } {
+  calculateStatistics(data: HealthcareRecord[]): Statistics {
     const total = data.length;
     
     // Count records by type

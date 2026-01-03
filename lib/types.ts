@@ -9,7 +9,7 @@ export interface HealthcareRecord {
   recordType: string;
   value: number | string;
   timestamp: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ApiResponse<T> {

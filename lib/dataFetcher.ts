@@ -35,7 +35,7 @@ class DataFetcher {
    */
   async fetchData<T = HealthcareRecord[]>(
     endpoint: string,
-    params?: Record<string, any>
+    params?: Record<string, string | number | boolean>
   ): Promise<T> {
     try {
       const response = await this.client.get<ApiResponse<T>>(endpoint, { params });
@@ -55,7 +55,7 @@ class DataFetcher {
    */
   async fetchWithRetry<T = HealthcareRecord[]>(
     endpoint: string,
-    params?: Record<string, any>,
+    params?: Record<string, string | number | boolean>,
     attempts: number = config.retryAttempts
   ): Promise<T> {
     let lastError: Error | null = null;

@@ -7,7 +7,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { dataSubmitter } from '@/lib/dataSubmitter';
 import { SubmissionPayload } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
@@ -41,12 +40,13 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
     
-  } catch (error: any) {
+  } catch (error) {
     console.error('Submit API error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to submit results';
     
     return NextResponse.json({
       success: false,
-      error: error.message || 'Failed to submit results',
+      error: errorMessage,
     }, { status: 500 });
   }
 }

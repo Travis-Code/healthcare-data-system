@@ -10,6 +10,11 @@
 
 import { HealthcareRecord } from './types';
 
+interface RawDataResponse {
+  data?: unknown[];
+  [key: string]: unknown;
+}
+
 class DataProcessor {
   /**
    * Clean raw healthcare data
@@ -17,9 +22,30 @@ class DataProcessor {
    * @param rawData - Raw data array from API
    * @returns Cleaned data array
    */
-  cleanData(rawData: HealthcareRecord[]): HealthcareRecord[] {
+  cleanData(rawData: HealthcareRecord[] | RawDataResponse | unknown[]): HealthcareRecord[] {
+    // Convert to array if needed
+    let dataArray: unknown[];
+    if (Array.isArray(rawData)) {
+      dataArray = rawData;
+    } else if (typeof rawData === 'object' && rawData !== null && 'data' in rawData) {
+      dataArray = (rawData as RawDataResponse).data || [];
+    } else {
+      dataArray = [rawData];
+    }
+
+    // Type guard and filter
+    const records = dataArray.filter((item): item is HealthcareRecord => {
+      return (
+        typeof item === 'object' &&
+        item !== null &&
+        'id' in item &&
+        'patientId' in item &&
+        'recordType' in item
+      );
+    });
+
     // Remove duplicates based on ID
-    const uniqueData = rawData.filter((record, index, self) =>
+    const uniqueData = records.filter((record, index, self) =>
       index === self.findIndex((r) => r.id === record.id)
     );
 

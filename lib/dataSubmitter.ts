@@ -30,7 +30,7 @@ class DataSubmitter {
    * @param data - Submission payload containing analysis results
    * @returns Promise with server response
    */
-  async submitResults(data: SubmissionPayload): Promise<any> {
+  async submitResults(data: SubmissionPayload): Promise<unknown> {
     try {
       const response = await this.client.post(config.postEndpoint, data);
       console.log('✅ Successfully submitted results');
@@ -50,7 +50,7 @@ class DataSubmitter {
   async submitWithRetry(
     data: SubmissionPayload,
     attempts: number = config.retryAttempts
-  ): Promise<any> {
+  ): Promise<unknown> {
     let lastError: Error | null = null;
 
     for (let i = 0; i < attempts; i++) {

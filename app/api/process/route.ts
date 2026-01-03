@@ -36,12 +36,13 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
     
-  } catch (error: any) {
+  } catch (error) {
     console.error('Process API error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to process data';
     
     return NextResponse.json({
       success: false,
-      error: error.message || 'Failed to process data',
+      error: errorMessage,
     }, { status: 500 });
   }
 }

@@ -37,8 +37,9 @@ export default function Home() {
       } else {
         setStatus(`❌ Error: ${result.error}`);
       }
-    } catch (error: any) {
-      setStatus(`❌ Failed to fetch: ${error.message}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      setStatus(`❌ Failed to fetch: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -72,8 +73,9 @@ export default function Home() {
       } else {
         setStatus(`❌ Error: ${result.error}`);
       }
-    } catch (error: any) {
-      setStatus(`❌ Failed to process: ${error.message}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      setStatus(`❌ Failed to process: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -112,8 +114,9 @@ export default function Home() {
       } else {
         setStatus(`❌ Error: ${result.error}`);
       }
-    } catch (error: any) {
-      setStatus(`❌ Failed to submit: ${error.message}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      setStatus(`❌ Failed to submit: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
